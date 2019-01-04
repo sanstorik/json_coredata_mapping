@@ -40,7 +40,7 @@ public class OrderDecedentLink: NSManagedObject {
 	static let idSync = "id"
 	static let idOrderSync = "idOrder"
 	static let createdSync = "created"
-  static let volumeSync = "volume"
+        static let volumeSync = "volume"
 
 	static func saveData(data: [String: Any], with context: NSManagedObjectContext, 
 	       isFromSync: Bool) -> OrderDecedentLink {
@@ -51,7 +51,7 @@ public class OrderDecedentLink: NSManagedObject {
 	   object.id = AppCredentials.integerFromObject(object: data[idSync])
 	   object.idOrder = AppCredentials.integerFromObject(object: data[idOrderSync])
 	   object.created = AppCredentials.dateFromObject(object: data[createdSync])
-     object.volume = AppCredentials.stringFromObject(object: data[volumeSync])
+           object.volume = AppCredentials.stringFromObject(object: data[volumeSync])
 	   return object
 	}
 
@@ -63,7 +63,7 @@ public class OrderDecedentLink: NSManagedObject {
 	   jsonDict[OrderDecedentLink.idSync] = id
 	   jsonDict[OrderDecedentLink.idOrderSync] = idOrder
 	   jsonDict[OrderDecedentLink.createdSync] = created
-     jsonDict[OrderItem.volumeSync] = volume
+           jsonDict[OrderItem.volumeSync] = volume
 	   return jsonDict
 	}
 }
@@ -93,21 +93,21 @@ public class Volume: NSManagedObject {
 
 	static func saveData(data: [String: Any], with context: NSManagedObjectContext, 
 	   isFromSync: Bool) -> Volume {
-	  let object = Volume(context: context)
-	  object.width = AppCredentials.integerFromObject(object: data[widthSync])
-	  object.height = AppCredentials.integerFromObject(object: data[heightSync])
-	  object.id = AppCredentials.integerFromObject(object: data[idSync])
-	  object.length = AppCredentials.integerFromObject(object: data[lengthSync])
-	  return object
+	   let object = Volume(context: context)
+	   object.width = AppCredentials.integerFromObject(object: data[widthSync])
+	   object.height = AppCredentials.integerFromObject(object: data[heightSync])
+	   object.id = AppCredentials.integerFromObject(object: data[idSync])
+	   object.length = AppCredentials.integerFromObject(object: data[lengthSync])
+	   return object
 	}
 
 	func toDictionary() -> [String: Any] {
-	  var jsonDict = [String: Any]()
-	  jsonDict[Volume.widthSync] = width
-	  jsonDict[Volume.heightSync] = height
-	  jsonDict[Volume.idSync] = id
-	  jsonDict[Volume.lengthSync] = length
-	  return jsonDict
+	   var jsonDict = [String: Any]()
+	   jsonDict[Volume.widthSync] = width
+	   jsonDict[Volume.heightSync] = height
+	   jsonDict[Volume.idSync] = id
+	   jsonDict[Volume.lengthSync] = length
+	   return jsonDict
 	}
 }
 
