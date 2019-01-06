@@ -22,7 +22,7 @@ func isStorageType(value: Any) -> Bool {
 
 func cocoaTypeFor(value: (String, Any)) -> String {
     return dataTypeFor(value: value, string: "string", date: "date",
-                       int64: "integer", float: "float", bool: "boolean")
+                       int64: "int64", float: "float", bool: "bool")
 }
 
 

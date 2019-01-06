@@ -1,15 +1,18 @@
 import Foundation
 
 
-private func spawnJSONIncteractionWith(json: [String: Any]) {
+private func spawnJSONInteractionWith(json: [String: Any]) {
     let path = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("jsonOutput.txt")
-    try? "".write(to: path, atomically: false, encoding: .utf8)
+    
+    if !FileManager.default.fileExists(atPath: path.path) {
+        FileManager.default.createFile(atPath: path.path, contents: nil)
+    } else {
+        try? "".write(to: path, atomically: false, encoding: .utf8)
+    }
     
     if let fileUpdater = try? FileHandle(forUpdating: path) {
-        fileUpdater.seekToEndOfFile()
-        
-        for obj in json {
-            spawnEntityFor(file: fileUpdater, key: obj.key, with: obj.value)
+        for (key, json) in json {
+            spawnEntityFor(file: fileUpdater, key: key, with: json)
         }
     }
 }
@@ -17,20 +20,19 @@ private func spawnJSONIncteractionWith(json: [String: Any]) {
 private func spawnEntityFor(file: FileHandle, key: String, with object: Any) {
     var className = String(key[..<String.Index(encodedOffset: key.count - 1)])
     className = className.prefix(1).uppercased() + className.dropFirst()
+    var value = [String: Any]()
     
     if let dictArray = object as? [[String: Any]] {
-        let dict = dictArray[0]
-
-        spawnEntityFor(file: file, className: className, with: dict)
-    } else if let arrayValues = object as? [String] {
-        let value = arrayValues[0]
+        value = dictArray[0]
+    } else if let arrayValues = object as? [String], arrayValues.count > 0 {
         let lowerCasedClassName = className.prefix(1).lowercased() + className.dropFirst()
-        
-        createClassFor(file: file, name: className, with: [lowerCasedClassName: value])
-        createCoreDataModelFor(file: file, className: className, with: [lowerCasedClassName: value])
+        value = [lowerCasedClassName: arrayValues[0]]
     } else if let dict = object as? [String: Any] {
-        spawnEntityFor(file: file, className: key.prefix(1).uppercased() + key.dropFirst(), with: dict)
+        className = key.prefix(1).uppercased() + key.dropFirst()
+        value = dict
     }
+    
+    spawnEntityFor(file: file, className: className, with: value)
 }
 
 
@@ -103,33 +105,33 @@ private func createToDictionaryMethodFor(file: FileHandle, with values: [String:
     let funcToDictionary = "\tfunc toDictionary() -> [String: Any] {\n"
     
     file.write(funcToDictionary.data(using: .utf8)!)
-    file.write("\t  var jsonDict = [String: Any]()".data(using: .utf8)!)
+    file.write("\t   var jsonDict = [String: Any]()".data(using: .utf8)!)
     
     for key in values.keys {
         let modifiedKey = forbiddenVariableNames[key] ?? key
-        file.write("\n\t  jsonDict[\(className).\(key)Sync] = \(modifiedKey)".data(using: .utf8)!)
+        file.write("\n\t   jsonDict[\(className).\(key)Sync] = \(modifiedKey)".data(using: .utf8)!)
     }
     
-    file.write("\n\t  return jsonDict".data(using: .utf8)!)
+    file.write("\n\t   return jsonDict".data(using: .utf8)!)
     file.write("\n\t}".data(using: .utf8)!)
 }
 
 
 private func createSaveDataMethodFor(file: FileHandle, with values: [String: Any], className: String) {
-    let funcSaveData = "\tstatic func saveData(data: [String: Any], " +
-            "with context: NSManagedObjectContext, \n\t   isFromSync: Bool) -> \(className) {\n"
+    let funcSaveData = "\tstatic func from(data: [String: Any], " +
+            "in context: NSManagedObjectContext) -> \(className) {\n"
     
     file.write(funcSaveData.data(using: .utf8)!)
-    file.write("\t  let object = \(className)(context: context)".data(using: .utf8)!)
+    file.write("\t   let object = \(className)(context: context)".data(using: .utf8)!)
     
     for innerObj in values {
         let type = cocoaTypeFor(value: innerObj)
         let modifiedKey = forbiddenVariableNames[innerObj.key] ?? innerObj.key
-        file.write(("\n\t  object.\(modifiedKey) = " +
-            "AppCredentials.\(type)FromObject(object: data[\(innerObj.0)Sync])").data(using: .utf8)!)
+        file.write(("\n\t   object.\(modifiedKey) = " +
+            "AppCredentials.\(type)From(object: data[\(innerObj.0)Sync])").data(using: .utf8)!)
     }
     
-    file.write("\n\t  return object".data(using: .utf8)!)
+    file.write("\n\t   return object".data(using: .utf8)!)
     file.write("\n\t}".data(using: .utf8)!)
 }
 
@@ -151,7 +153,7 @@ let forbiddenVariableNames = ["isDeleted" : "isDeletedSync"]
 
 fileprivate func main() {
     if let json = readJson() {
-        spawnJSONIncteractionWith(json: json)
+        spawnJSONInteractionWith(json: json)
     }
 }
 
