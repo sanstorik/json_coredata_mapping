@@ -148,7 +148,8 @@ private func readJson() -> [String: Any]? {
 }
 
 
-let forbiddenVariableNames = ["isDeleted" : "isDeletedSync"]
+let forbiddenVariableNames = ["isDeleted" : "isDeletedSync",
+                              "description": "descriptionSync"]
 
 
 fileprivate func main() {
