@@ -42,16 +42,14 @@ public class OrderDecedentLink: NSManagedObject {
 	static let createdSync = "created"
         static let volumeSync = "volume"
 
-	static func saveData(data: [String: Any], with context: NSManagedObjectContext, 
-	       isFromSync: Bool) -> OrderDecedentLink {
+	static func from(data: [String: Any], in context: NSManagedObjectContext) -> OrderDecedentLink {
 	   let object = OrderDecedentLink(context: context)
-	   object.idDecedent = AppCredentials.integerFromObject(object: data[idDecedentSync])
-	   object.isDeletedSync = AppCredentials.booleanFromObject(object: data[isDeletedSync])
-	   object.modified = AppCredentials.dateFromObject(object: data[modifiedSync])
-	   object.id = AppCredentials.integerFromObject(object: data[idSync])
-	   object.idOrder = AppCredentials.integerFromObject(object: data[idOrderSync])
-	   object.created = AppCredentials.dateFromObject(object: data[createdSync])
-           object.volume = AppCredentials.stringFromObject(object: data[volumeSync])
+	   object.isDeletedSync = AppCredentials.boolFrom(object: data[isDeletedSync])
+	   object.created = AppCredentials.dateFrom(object: data[createdSync])
+	   object.id = AppCredentials.int64From(object: data[idSync])
+	   object.idDecedent = AppCredentials.int64From(object: data[idDecedentSync])
+	   object.idOrder = AppCredentials.int64From(object: data[idOrderSync])
+	   object.modified = AppCredentials.dateFrom(object: data[modifiedSync])
 	   return object
 	}
 
@@ -91,13 +89,12 @@ public class Volume: NSManagedObject {
 	static let idSync = "id"
 	static let lengthSync = "length"
 
-	static func saveData(data: [String: Any], with context: NSManagedObjectContext, 
-	   isFromSync: Bool) -> Volume {
+	static func from(data: [String: Any], in context: NSManagedObjectContext) -> Volume {
 	   let object = Volume(context: context)
-	   object.width = AppCredentials.integerFromObject(object: data[widthSync])
-	   object.height = AppCredentials.integerFromObject(object: data[heightSync])
-	   object.id = AppCredentials.integerFromObject(object: data[idSync])
-	   object.length = AppCredentials.integerFromObject(object: data[lengthSync])
+	   object.height = AppCredentials.int64From(object: data[heightSync])
+	   object.id = AppCredentials.int64From(object: data[idSync])
+	   object.length = AppCredentials.int64From(object: data[lengthSync])
+	   object.width = AppCredentials.int64From(object: data[widthSync])
 	   return object
 	}
 
