@@ -32,39 +32,43 @@ Let's take a look at json first. We have one array of entity orderDecedentLink.
 It will cause to spawn OrderDecedentLink with all variables and JSON mapping model inside.
 
 ```swift
-public class OrderDecedentLink: NSManagedObject {
-	static let SQL_TABLE = "OrderDecedentLink"
-	static let idDecedentSync = "idDecedent"
-	static let isDeletedSync = "isDeletedSync"
-	static let modifiedSync = "modified"
-	static let idSync = "id"
+public class OrderDecedentLink: NSManagedObject, UpdatableEntity {
+	static var globalName: String { return "OrderDecedentLink" }
+	static var globalIdKey: String { return idOrder }
 	static let idOrderSync = "idOrder"
+	static let isDeletedSync = "isDeleted"
+	static let idSync = "id"
 	static let createdSync = "created"
-        static let volumeSync = "volume"
+	static let idDecedentSync = "idDecedent"
+	static let modifiedSync = "modified"
 
-	static func from(data: [String: Any], in context: NSManagedObjectContext) -> OrderDecedentLink {
-	   let object = OrderDecedentLink(context: context)
-	   object.isDeletedSync = AppCredentials.boolFrom(object: data[isDeletedSync])
-	   object.created = AppCredentials.dateFrom(object: data[createdSync])
-	   object.id = AppCredentials.int64From(object: data[idSync])
-	   object.idDecedent = AppCredentials.int64From(object: data[idDecedentSync])
-	   object.idOrder = AppCredentials.int64From(object: data[idOrderSync])
-	   object.modified = AppCredentials.dateFrom(object: data[modifiedSync])
-	   return object
+	static func create(from json: [String: Any], in context: NSManagedObjectContext) -> Self {
+    	  let entity = self.init(context: context)
+    	  entity.update(from: json)
+    	  return entity
 	}
 
- 	func toDictionary() -> [String: Any] {
+	func update(from data: [String: Any]) {
+	   idOrder = AppCredentials.int64From(object: data[OrderDecedentLink.idOrderSync])
+	   isDeletedValue = AppCredentials.boolFrom(object: data[OrderDecedentLink.isDeletedSync])
+	   id = AppCredentials.int64From(object: data[OrderDecedentLink.idSync])
+	   created = AppCredentials.dateFrom(object: data[OrderDecedentLink.createdSync])
+	   idDecedent = AppCredentials.int64From(object: data[OrderDecedentLink.idDecedentSync])
+	   modified = AppCredentials.dateFrom(object: data[OrderDecedentLink.modifiedSync])
+	}
+
+	func toDictionary() -> [String: Any] {
 	   var jsonDict = [String: Any]()
-	   jsonDict[OrderDecedentLink.idDecedentSync] = idDecedent
-	   jsonDict[OrderDecedentLink.isDeletedSync] = isDeletedSync
-	   jsonDict[OrderDecedentLink.modifiedSync] = modified
-	   jsonDict[OrderDecedentLink.idSync] = id
 	   jsonDict[OrderDecedentLink.idOrderSync] = idOrder
+	   jsonDict[OrderDecedentLink.isDeletedSync] = isDeletedValue
+	   jsonDict[OrderDecedentLink.idSync] = id
 	   jsonDict[OrderDecedentLink.createdSync] = created
-           jsonDict[OrderItem.volumeSync] = volume
+	   jsonDict[OrderDecedentLink.idDecedentSync] = idDecedent
+	   jsonDict[OrderDecedentLink.modifiedSync] = modified
 	   return jsonDict
 	}
-}
+ }
+
 
 <entity name="OrderDecedentLink" representedClassName=".OrderDecedentLink">
     <attribute name="idDecedent" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES" syncable="YES"></attribute>
@@ -82,31 +86,36 @@ public class OrderDecedentLink: NSManagedObject {
 Also there is a volume DTO inside OrderDecedentLink, so volume class will be created as well.
 
 ```swift
-public class Volume: NSManagedObject {
-	static let SQL_TABLE = "Volume"
-	static let widthSync = "width"
-	static let heightSync = "height"
-	static let idSync = "id"
+public class Volume: NSManagedObject, UpdatableEntity {
+	static var globalName: String { return "Volume" }
+	static var globalIdKey: String { return id }
 	static let lengthSync = "length"
+	static let widthSync = "width"
+	static let idSync = "id"
+	static let heightSync = "height"
 
-	static func from(data: [String: Any], in context: NSManagedObjectContext) -> Volume {
-	   let object = Volume(context: context)
-	   object.height = AppCredentials.int64From(object: data[heightSync])
-	   object.id = AppCredentials.int64From(object: data[idSync])
-	   object.length = AppCredentials.int64From(object: data[lengthSync])
-	   object.width = AppCredentials.int64From(object: data[widthSync])
-	   return object
+	static func create(from json: [String: Any], in context: NSManagedObjectContext) -> Self {
+    	  let entity = self.init(context: context)
+    	  entity.update(from: json)
+    	  return entity
+	}
+
+	func update(from data: [String: Any]) {
+	   length = AppCredentials.int64From(object: data[Volume.lengthSync])
+	   width = AppCredentials.int64From(object: data[Volume.widthSync])
+	   id = AppCredentials.int64From(object: data[Volume.idSync])
+	   height = AppCredentials.int64From(object: data[Volume.heightSync])
 	}
 
 	func toDictionary() -> [String: Any] {
 	   var jsonDict = [String: Any]()
-	   jsonDict[Volume.widthSync] = width
-	   jsonDict[Volume.heightSync] = height
-	   jsonDict[Volume.idSync] = id
 	   jsonDict[Volume.lengthSync] = length
+	   jsonDict[Volume.widthSync] = width
+	   jsonDict[Volume.idSync] = id
+	   jsonDict[Volume.heightSync] = height
 	   return jsonDict
 	}
-}
+ }
 
 <entity name="Volume" representedClassName=".Volume">
     <attribute name="width" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES" syncable="YES"></attribute>
