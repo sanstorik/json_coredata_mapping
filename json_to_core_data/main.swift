@@ -46,11 +46,11 @@ private func spawnEntityFor(file: FileHandle, className: String, with object: [S
 private func createClassFor(file: FileHandle, name: String, with values: [String: Any]) {
     file.write("   public class \(name): NSManagedObject, UpdatableEntity {\n".data(using: .utf8)!)
     createConstantsFor(file: file, with: values, className: name)
-    file.write("\n\n".data(using: .utf8)!)
+    file.write("\n\n\n".data(using: .utf8)!)
     createSpawnMethodFor(file: file, with: values, className: name)
-    file.write("\n\n".data(using: .utf8)!)
+    file.write("\n\n\n".data(using: .utf8)!)
     createUpdateMethodFor(file: file, with: values, className: name)
-    file.write("\n\n".data(using: .utf8)!)
+    file.write("\n\n\n".data(using: .utf8)!)
     createToDictionaryMethodFor(file: file, with: values, className: name)
     file.write("\n   }\n".data(using: .utf8)!)
 }
@@ -98,7 +98,7 @@ private func createConstantsFor(file: FileHandle, with values: [String: Any], cl
     file.write("\(staticVar) globalName: String { return \"\(className)\" }".data(using: .utf8)!)
     
     let id = values.keys.first { $0.starts(with: "id") } ?? "id"
-    file.write("\(staticVar) globalIdKey: String { return \(id)}".data(using: .utf8)!)
+    file.write("\n\(staticVar) globalIdKey: String { return \(id) }".data(using: .utf8)!)
     
     for key in values.keys {
         file.write("\n\(staticLet) \(key)Sync = \"\(key)\"".data(using: .utf8)!)
@@ -124,20 +124,18 @@ private func createToDictionaryMethodFor(file: FileHandle, with values: [String:
 
 private func createSpawnMethodFor(file: FileHandle, with values: [String: Any], className: String) {
     file.write("""
-        static func create(from json: [String: Any], in context: NSManagedObjectContext) -> Self {
-            let entity = self.init(context: context)
-            entity.update(from: json)
-            return entity
-        }
+        \tstatic func create(from json: [String: Any], in context: NSManagedObjectContext) -> Self {
+            \t  let entity = self.init(context: context)
+            \t  entity.update(from: json)
+            \t  return entity
+        \t}
         """.data(using: .utf8)!)
-    
-    file.write("\n\t}".data(using: .utf8)!)
 }
 
 
 
 private func createUpdateMethodFor(file: FileHandle, with values: [String: Any], className: String) {
-    let funcSaveData = "func update(from data: [String: Any]) {\n"
+    let funcSaveData = "\tfunc update(from data: [String: Any]) {\n"
     
     file.write(funcSaveData.data(using: .utf8)!)
     
