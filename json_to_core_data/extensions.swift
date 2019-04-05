@@ -32,34 +32,74 @@ func coreDataTypeFor(value: (String, Any)) -> String {
 }
 
 
-private func dataTypeFor(value: (String, Any),
-                         string: String,
-                         date: String,
-                         int64: String,
-                         float: String,
-                         bool: String) -> String {
-    if value.0.starts(with: "is") { return bool }
+enum DataType {
+    case string, date, int64, float, bool
+}
+
+func dataTypeFor(value: (String, Any)) -> DataType {
+    if value.0.starts(with: "is") { return .bool }
     
-    var type = string
+    var type = DataType.string
     if value.1 is String {
         if NSDate.from(string: value.1 as! String) != nil {
-            type = date
-        } else if isBoolean(value) { type = bool }
+            type = .date
+        } else if isBoolean(value) { type = .bool }
     } else if value.1 is Int64 || value.1 is Int {
-        type = int64
+        type = .int64
     } else if value.1 is Float || value.1 is Double {
-        type = float
+        type = .float
     } else if value.1 is Bool {
-        type = bool
+        type = .bool
     }
     
     return type
 }
 
 
+func pluralToSingleClass(_ className: String) -> String {
+    if className.hasSuffix("ies") {
+        return String(className[..<String.Index(encodedOffset: className.count - 3)]).appending("y")
+    } else if className.hasSuffix("es") {
+        return String(className[..<String.Index(encodedOffset: className.count - 2)])
+    } else if className.hasSuffix("s") {
+        return String(className[..<String.Index(encodedOffset: className.count - 1)])
+    } else {
+        return className
+    }
+}
+
+
+private func dataTypeFor(value: (String, Any),
+                         string: String,
+                         date: String,
+                         int64: String,
+                         float: String,
+                         bool: String) -> String {
+    switch dataTypeFor(value: value) {
+    case .bool:
+        return bool
+    case .date:
+        return date
+    case .int64:
+        return int64
+    case .float:
+        return float
+    case .string:
+        return string
+    }
+}
+
+
 private func isBoolean(_ value: Any) -> Bool {
     return value is Bool
-        ||  (value is String
+        || (value is String
             && ((value as! String).caseInsensitiveCompare("true") == .orderedSame
                 || (value as! String).caseInsensitiveCompare("false") == .orderedSame))
+}
+
+
+extension FileHandle {
+    func write(_ string: String) {
+        self.write(string.data(using: .utf8)!)
+    }
 }

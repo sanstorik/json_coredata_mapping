@@ -18,7 +18,7 @@ private func spawnJSONInteractionWith(json: [String: Any]) {
 }
 
 private func spawnEntityFor(file: FileHandle, key: String, with object: Any) {
-    var className = String(key[..<String.Index(encodedOffset: key.count - 1)])
+    var className = pluralToSingleClass(key)
     className = className.prefix(1).uppercased() + className.dropFirst()
     var value = [String: Any]()
     
@@ -37,22 +37,20 @@ private func spawnEntityFor(file: FileHandle, key: String, with object: Any) {
 
 
 private func spawnEntityFor(file: FileHandle, className: String, with object: [String: Any]) {
-    file.write("\n\n\n".data(using: .utf8)!)
+    file.write("\n\n\n")
     createClassFor(file: file, name: className, with: object)
     createCoreDataModelFor(file: file, className: className, with: object)
 }
 
 
 private func createClassFor(file: FileHandle, name: String, with values: [String: Any]) {
-    file.write("   public class \(name): NSManagedObject, UpdatableEntity {\n".data(using: .utf8)!)
+    file.write("   public class \(name): NSManagedObject, UpdatableEntity {\n")
     createConstantsFor(file: file, with: values, className: name)
-    file.write("\n\n\n".data(using: .utf8)!)
-    createSpawnMethodFor(file: file, with: values, className: name)
-    file.write("\n\n\n".data(using: .utf8)!)
+    file.write("\n\n\n")
     createUpdateMethodFor(file: file, with: values, className: name)
-    file.write("\n\n\n".data(using: .utf8)!)
+    file.write("\n\n\n")
     createToDictionaryMethodFor(file: file, with: values, className: name)
-    file.write("\n   }\n".data(using: .utf8)!)
+    file.write("\n   }\n")
 }
 
 
@@ -95,13 +93,12 @@ private func createCoreDataModelFor(file: FileHandle, className: String, with va
 private func createConstantsFor(file: FileHandle, with values: [String: Any], className: String) {
     let staticLet = "\tstatic let"
     let staticVar = "\tstatic var"
-    file.write("\(staticVar) globalName: String { return \"\(className)\" }".data(using: .utf8)!)
     
-    let id = values.keys.first { $0.starts(with: "id") } ?? "id"
-    file.write("\n\(staticVar) globalIdKey: String { return \(id) }".data(using: .utf8)!)
+    file.write("\(staticVar) globalName: String { return \"\(className)\" }")
+    file.write("\n\(staticVar) globalIdKey: String { return idSync }")
     
     for key in values.keys {
-        file.write("\n\(staticLet) \(key)Sync = \"\(key)\"".data(using: .utf8)!)
+        file.write("\n\(staticLet) \(key)Sync = \"\(key)\"")
     }
 }
 
@@ -109,16 +106,20 @@ private func createConstantsFor(file: FileHandle, with values: [String: Any], cl
 private func createToDictionaryMethodFor(file: FileHandle, with values: [String: Any], className: String) {
     let funcToDictionary = "\tfunc toDictionary() -> [String: Any] {\n"
     
-    file.write(funcToDictionary.data(using: .utf8)!)
-    file.write("\t   var jsonDict = [String: Any]()".data(using: .utf8)!)
+    file.write(funcToDictionary)
+    file.write("\t   var jsonDict = [String: Any]()")
     
-    for key in values.keys {
+    for (key, value) in values {
         let modifiedKey = forbiddenVariableNames[key] ?? key
-        file.write("\n\t   jsonDict[\(className).\(key)Sync] = \(modifiedKey)".data(using: .utf8)!)
+        file.write("\n\t   jsonDict[\(className).\(key)Sync] = \(modifiedKey)")
+        
+        if dataTypeFor(value: (key, value)) == .date {
+            file.write("?.formatDate()")
+        }
     }
     
-    file.write("\n\t   return jsonDict".data(using: .utf8)!)
-    file.write("\n\t}".data(using: .utf8)!)
+    file.write("\n\t   return jsonDict")
+    file.write("\n\t}")
 }
 
 
@@ -129,24 +130,23 @@ private func createSpawnMethodFor(file: FileHandle, with values: [String: Any], 
             \t  entity.update(from: json)
             \t  return entity
         \t}
-        """.data(using: .utf8)!)
+        """)
 }
 
 
 
 private func createUpdateMethodFor(file: FileHandle, with values: [String: Any], className: String) {
-    let funcSaveData = "\tfunc update(from data: [String: Any]) {\n"
-    
-    file.write(funcSaveData.data(using: .utf8)!)
+    let funcSaveData = "\tfunc update(from data: [String: Any]) {"
+    file.write(funcSaveData)
     
     for innerObj in values {
         let type = cocoaTypeFor(value: innerObj)
         let modifiedKey = forbiddenVariableNames[innerObj.key] ?? innerObj.key
         file.write(("\n\t   \(modifiedKey) = " +
-            "AppCredentials.\(type)From(object: data[\(className).\(innerObj.0)Sync])").data(using: .utf8)!)
+            "Utility.\(type)From(object: data[\(className).\(innerObj.0)Sync])"))
     }
     
-    file.write("\n\t}".data(using: .utf8)!)
+    file.write("\n\t}")
 }
 
 
